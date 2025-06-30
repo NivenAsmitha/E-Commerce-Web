@@ -1,19 +1,20 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
+  darkMode: "class",
   theme: {
     extend: {
-      primary: {
-        primary: "#dd0199", // Default primary color
-        secondary: "#ddb1f2", // Lighter shade for hover effects
+      colors: {
+        primary: "#dd0199", // Pink
+        secondary: "#5b2e8c", // Deep purple
+        accent: "#f7971e", // Orange (optional)
       },
-
       container: {
-        center: true, // Center the container
+        center: true,
         padding: {
-          DEFAULT: "2rem", // Default padding for the container
-          sm: "3rem", // Padding for small screens
-        }, // Padding for the container
+          DEFAULT: "2rem",
+          sm: "3rem",
+        },
       },
     },
   },
