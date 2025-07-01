@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import LOGO from "../../assets/logo.png";
 import { IoMdSearch } from "react-icons/io";
 import { FaCartShopping, FaCaretDown } from "react-icons/fa6";
+import { FaUserCircle } from "react-icons/fa";
 import Darkmood from "./Darkmood";
 
 // Main nav links
@@ -31,7 +32,7 @@ const Navbar = () => {
             <img src={LOGO} alt="Logo" className="w-12" />
             KAIZEN
           </a>
-          {/* Search Bar + Order Button + Darkmood */}
+          {/* Search Bar + Order Button + Darkmood + Login */}
           <div className="relative flex items-center gap-2">
             {/* Search Bar */}
             <div className="relative group hidden sm:block">
@@ -42,6 +43,7 @@ const Navbar = () => {
               />
               <IoMdSearch className="text-gray-500 group-hover:text-primary absolute top-1/2 left-3 -translate-y-1/2 text-xl pointer-events-none" />
             </div>
+
             {/* Order Button */}
             <button
               onClick={() => alert("Ordering not available yet")}
@@ -51,6 +53,17 @@ const Navbar = () => {
                 Order
               </span>
               <FaCartShopping className="text-xl" />
+            </button>
+            {/* Login Button - MATCHES Order Button */}
+            <button
+              onClick={() => alert("Login functionality coming soon!")}
+              className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group"
+              title="Login"
+            >
+              <span className="group-hover:block hidden transition-all duration-200">
+                Login
+              </span>
+              <FaUserCircle className="text-xl" />
             </button>
             {/* Dark Mode Toggle */}
             <Darkmood />
