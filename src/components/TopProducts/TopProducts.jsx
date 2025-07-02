@@ -43,12 +43,17 @@ const TopProducts = ({ handleOrderPopup }) => {
           <h1 className="text-3xl font-bold text-primary" data-aos="fade-up">
             Best Products
           </h1>
+
           <p
             className="text-xs text-gray-400 dark:text-gray-300"
             data-aos="fade-up"
           >
             Discover the highest-rated picks from our newest arrivals. Curated
             for quality and style.
+          </p>
+          <p className="text-gray-500 leading-relaxed">
+            <br />
+            <br />
           </p>
         </div>
         {/* Products grid */}

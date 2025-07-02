@@ -60,7 +60,7 @@ const Hero = ({ handleOrderPopup }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2">
                 {/* Text content */}
                 <div className="flex flex-col justify-center gap-4 pt-12 sm:pt-0 text-center sm:text-left order-2 sm:order-1 relative z-10">
-                  <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-primary via-fuchsia-400 to-secondary bg-clip-text text-transparent drop-shadow">
+                  <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-black via-gray-700 to-gray-900 bg-clip-text text-transparent drop-shadow">
                     {data.title}
                   </h1>
                   <p className="text-base text-gray-800 dark:text-gray-200">
