@@ -9,9 +9,9 @@ import Darkmood from "./Darkmood";
 const Menu = [
   { id: 1, name: "Home", link: "/#" },
   { id: 2, name: "Top Rated", link: "/#services" },
-  { id: 3, name: "Kids Wear", link: "/#" },
+  { id: 3, name: "Women Wear", link: "/#" },
   { id: 4, name: "Mens Wear", link: "/#" },
-  { id: 5, name: "Electronics", link: "/#" },
+  { id: 5, name: "About Us", link: "/#" },
 ];
 
 // Dropdown links
@@ -21,7 +21,7 @@ const DropdownLinks = [
   { id: 3, name: "Top Rated", link: "/#" },
 ];
 
-const Navbar = () => {
+const Navbar = ({ setOrderPopup }) => {
   return (
     <div className="shadow-md bg-white dark:bg-gray-900 dark:text-white">
       {/* Upper Navbar */}
@@ -56,7 +56,7 @@ const Navbar = () => {
             </button>
             {/* Login Button - MATCHES Order Button */}
             <button
-              onClick={() => alert("Login functionality coming soon!")}
+              onClick={() => setOrderPopup(true)}
               className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group"
               title="Login"
             >
@@ -65,6 +65,7 @@ const Navbar = () => {
               </span>
               <FaUserCircle className="text-xl" />
             </button>
+
             {/* Dark Mode Toggle */}
             <Darkmood />
           </div>
