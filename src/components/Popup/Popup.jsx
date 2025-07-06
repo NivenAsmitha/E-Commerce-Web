@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { IoCloseOutline } from "react-icons/io5";
+import { useNavigate } from "react-router-dom";
 
-const Popup = ({ orderPopup, setOrderPopup }) => {
+const Popup = ({ orderPopup, setOrderPopup, setRole }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     username: "",
@@ -10,6 +11,7 @@ const Popup = ({ orderPopup, setOrderPopup }) => {
     address: "",
   });
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const resetForm = () => {
     setFormData({ username: "", password: "", email: "", address: "" });
@@ -20,7 +22,7 @@ const Popup = ({ orderPopup, setOrderPopup }) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setError("");
     // TODO: Replace with real backend auth call
@@ -28,22 +30,41 @@ const Popup = ({ orderPopup, setOrderPopup }) => {
       setError("Please enter username and password");
       return;
     }
-    alert("Logged in (demo only, not real)!");
-    setOrderPopup(false);
-    resetForm();
+    try {
+      // Replace the URL with your real backend endpoint!
+      const res = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error("Invalid username or password");
+      }
+      const data = await res.json();
+      if (!data.role) {
+        setError("User role not found");
+        return;
+      }
+      setRole(data.role); // From backend: "admin" or "user"
+      setOrderPopup(false);
+      resetForm();
+      if (data.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
+      setError(err.message || "Login failed");
+    }
   };
 
   const handleRegisterSubmit = (e) => {
     e.preventDefault();
-    setError("");
-    // TODO: Replace with real backend registration call
-    if (!formData.username || !formData.password || !formData.email) {
-      setError("Please fill all required fields");
-      return;
-    }
-    alert("Registered (demo only, not real)!");
-    setIsLogin(true);
-    resetForm();
+    setError("Registration not implemented here.");
+    // For demo, registration is not implemented
   };
 
   if (!orderPopup) return null;
@@ -134,7 +155,7 @@ const Popup = ({ orderPopup, setOrderPopup }) => {
               required
               value={formData.password}
               onChange={handleInputChange}
-              className="w-full mb-4 px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100"
+              className="w-full mb-3 px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100"
             />
             <button
               type="submit"
@@ -170,7 +191,7 @@ const Popup = ({ orderPopup, setOrderPopup }) => {
               required
               value={formData.password}
               onChange={handleInputChange}
-              className="w-full mb-4 px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100"
+              className="w-full mb-3 px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100"
             />
             <input
               type="text"
@@ -183,8 +204,9 @@ const Popup = ({ orderPopup, setOrderPopup }) => {
             <button
               type="submit"
               className="w-full bg-gradient-to-r from-primary to-secondary text-white py-2 rounded-full hover:scale-105 transition-transform duration-200"
+              disabled
             >
-              Register
+              Register (Not implemented)
             </button>
           </form>
         )}

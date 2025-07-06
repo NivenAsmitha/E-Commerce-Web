@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import LOGO from "../../assets/logo.png";
 import { IoMdSearch } from "react-icons/io";
 import { FaCartShopping, FaCaretDown } from "react-icons/fa6";
@@ -9,21 +9,22 @@ import Darkmood from "./Darkmood";
 // Navigation links
 const Menu = [
   { id: 1, name: "Home", type: "page", link: "/" },
-  { id: 2, name: "Top Rated", type: "page", link: "/services" },
+  { id: 2, name: "Top Rated", type: "page", link: "/toprated" },
   { id: 3, name: "Women Wear", type: "page", link: "/womenwear" },
-  { id: 4, name: "Mens Wear", type: "page", link: "/menswear" }, // <-- this line changed!
+  { id: 4, name: "Mens Wear", type: "page", link: "/menswear" },
   { id: 5, name: "About Us", type: "page", link: "/about" },
 ];
 
 // Dropdown links example (for Trending)
 const DropdownLinks = [
-  { id: 1, name: "Foot Wear", type: "page", link: "/about" }, // example as a page
-  { id: 2, name: "Hats & Caps", type: "section", link: "#bestselling" },
-  { id: 3, name: "Bags", type: "section", link: "#toprated" },
+  { id: 1, name: "Foot Wear", type: "page", link: "/footwear" },
+  { id: 2, name: "Hats & Caps", type: "page", link: "/caps" },
+  { id: 3, name: "Bags", type: "page", link: "/bag" },
 ];
 
 const Navbar = ({ setOrderPopup }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <div className="shadow-md bg-white dark:bg-gray-900 dark:text-white">
@@ -48,9 +49,9 @@ const Navbar = ({ setOrderPopup }) => {
               <IoMdSearch className="text-gray-500 group-hover:text-primary absolute top-1/2 left-3 -translate-y-1/2 text-xl pointer-events-none" />
             </div>
 
-            {/* Order Button */}
+            {/* Cart Button */}
             <button
-              onClick={() => alert("Ordering not available yet")}
+              onClick={() => navigate("/cart")}
               className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group"
             >
               <span className="group-hover:block hidden transition-all duration-200">
