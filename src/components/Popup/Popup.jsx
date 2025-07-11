@@ -8,7 +8,7 @@ const Popup = ({ orderPopup, setOrderPopup, setRole }) => {
     username: "",
     password: "",
     email: "",
-    address: "",
+    phone: "",
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ const Popup = ({ orderPopup, setOrderPopup, setRole }) => {
         setError("User role not found");
         return;
       }
-      setRole(data.role); // From backend: "admin" or "user"
+      setRole(data.role); // "admin" or "user"
       setOrderPopup(false);
       resetForm();
       if (data.role === "admin") {
@@ -166,6 +166,14 @@ const Popup = ({ orderPopup, setOrderPopup, setRole }) => {
           </form>
         ) : (
           <form onSubmit={handleRegisterSubmit}>
+            {/* Role Field (Read Only) */}
+            <input
+              type="text"
+              name="role"
+              value="user"
+              disabled
+              className="w-full mb-3 px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-200 text-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
+            />
             <input
               type="text"
               name="username"
@@ -195,9 +203,10 @@ const Popup = ({ orderPopup, setOrderPopup, setRole }) => {
             />
             <input
               type="text"
-              name="address"
-              placeholder="Address"
-              value={formData.address}
+              name="phone"
+              placeholder="Phone Number"
+              required
+              value={formData.phone}
               onChange={handleInputChange}
               className="w-full mb-4 px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100"
             />
