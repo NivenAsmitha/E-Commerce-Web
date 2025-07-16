@@ -44,11 +44,14 @@ const Navbar = ({
       {/* Upper Navbar */}
       <div className="bg-primary/40 py-2">
         <div className="container mx-auto flex justify-between items-center py-2">
+          {/* Logo and Brand */}
           <Link to="/" className="font-bold text-xl flex items-center gap-2">
             <img src={LOGO} alt="Logo" className="w-12" />
             KAIZEN
           </Link>
+          {/* Right Side */}
           <div className="relative flex items-center gap-3">
+            {/* Search Bar */}
             <div className="relative group hidden sm:block">
               <input
                 type="text"
@@ -57,6 +60,7 @@ const Navbar = ({
               />
               <IoMdSearch className="text-gray-500 group-hover:text-primary absolute top-1/2 left-3 -translate-y-1/2 text-xl pointer-events-none" />
             </div>
+            {/* Cart Button with badge */}
             <button
               onClick={() => navigate("/cart")}
               className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group relative"
@@ -72,8 +76,9 @@ const Navbar = ({
                 </span>
               )}
             </button>
-            {/* Profile/username/logout */}
+            {/* Profile Icon + Username + Login/Logout */}
             {username ? (
+              // If logged in: show profile icon, username, and logout button
               <>
                 <div className="flex items-center gap-2">
                   <FaUserCircle className="text-2xl text-primary" />
@@ -83,13 +88,14 @@ const Navbar = ({
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full ml-2 text-gray-800 dark:text-gray-100 hover:bg-red-100 dark:hover:bg-red-500 hover:text-red-600 transition"
+                  className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-2 ml-2 font-semibold shadow"
                   title="Logout"
                 >
                   Logout
                 </button>
               </>
             ) : (
+              // If not logged in: show Login button only (with icon)
               <button
                 onClick={() => setOrderPopup(true)}
                 className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-2 group"
@@ -131,7 +137,7 @@ const Navbar = ({
               )}
             </li>
           ))}
-          {/* Dropdown */}
+          {/* Dropdown Example */}
           <li className="group relative">
             <a href="#" className="flex items-center gap-[2px] py-2">
               Other Accessory
@@ -169,6 +175,7 @@ const Navbar = ({
               </ul>
             </div>
           </li>
+          {/* ⭐️ Admin Dashboard link only for admin */}
           {role === "admin" && (
             <li>
               <Link

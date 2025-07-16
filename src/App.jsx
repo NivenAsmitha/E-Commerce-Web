@@ -45,11 +45,13 @@ function App() {
     if (savedUsername) setUsername(savedUsername);
   }, []);
 
+  // This is the key function!
   const handleAddToCart = (product) => {
     setCartItems((prev) => [...prev, product]);
     setSuccessMessage("Item added to cart!");
     setTimeout(() => setSuccessMessage(""), 2000);
   };
+
   const removeFromCart = (removeIdx) =>
     setCartItems((prev) => prev.filter((_, idx) => idx !== removeIdx));
   const clearCart = () => setCartItems([]);
@@ -70,11 +72,14 @@ function App() {
         setRole={setRole}
         setUsername={setUsername}
       />
+
+      {/* Global success message for Add to Cart */}
       {successMessage && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded shadow-lg z-50">
           {successMessage}
         </div>
       )}
+
       <Routes>
         <Route
           path="/"
@@ -99,9 +104,18 @@ function App() {
           element={<Womenwear handleAddToCart={handleAddToCart} />}
         />
         <Route path="/toprated" element={<Toprated />} />
-        <Route path="/footwear" element={<Footwear />} />
-        <Route path="/caps" element={<Caps />} />
-        <Route path="/bag" element={<Bag />} />
+        <Route
+          path="/footwear"
+          element={<Footwear handleAddToCart={handleAddToCart} />}
+        />
+        <Route
+          path="/caps"
+          element={<Caps handleAddToCart={handleAddToCart} />}
+        />
+        <Route
+          path="/bag"
+          element={<Bag handleAddToCart={handleAddToCart} />}
+        />
         <Route
           path="/cart"
           element={
