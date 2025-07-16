@@ -2,11 +2,10 @@ import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import LOGO from "../../assets/logo.png";
 import { IoMdSearch } from "react-icons/io";
-import { FaCartShopping, FaCaretDown } from "react-icons/fa6";
+import { FaCartShopping } from "react-icons/fa6";
 import { FaUserCircle } from "react-icons/fa";
 import Darkmood from "./Darkmood";
 
-// Navigation links
 const Menu = [
   { id: 1, name: "Home", type: "page", link: "/" },
   { id: 2, name: "Top Rated", type: "page", link: "/toprated" },
@@ -15,31 +14,41 @@ const Menu = [
   { id: 5, name: "About Us", type: "page", link: "/about" },
 ];
 
-// Dropdown links example (for Trending)
 const DropdownLinks = [
   { id: 1, name: "Foot Wear", type: "page", link: "/footwear" },
   { id: 2, name: "Hats & Caps", type: "page", link: "/caps" },
   { id: 3, name: "Bags", type: "page", link: "/bag" },
 ];
 
-const Navbar = ({ setOrderPopup }) => {
+const Navbar = ({
+  setOrderPopup,
+  username,
+  role,
+  setRole,
+  setUsername,
+  cartItems = [],
+}) => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    setRole("");
+    setUsername("");
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
+    navigate("/");
+  };
 
   return (
     <div className="shadow-md bg-white dark:bg-gray-900 dark:text-white">
       {/* Upper Navbar */}
       <div className="bg-primary/40 py-2">
         <div className="container mx-auto flex justify-between items-center py-2">
-          {/* Logo and Brand */}
           <Link to="/" className="font-bold text-xl flex items-center gap-2">
             <img src={LOGO} alt="Logo" className="w-12" />
             KAIZEN
           </Link>
-
-          {/* Search Bar + Order Button + Darkmood + Login */}
-          <div className="relative flex items-center gap-2">
-            {/* Search Bar */}
+          <div className="relative flex items-center gap-3">
             <div className="relative group hidden sm:block">
               <input
                 type="text"
@@ -48,36 +57,52 @@ const Navbar = ({ setOrderPopup }) => {
               />
               <IoMdSearch className="text-gray-500 group-hover:text-primary absolute top-1/2 left-3 -translate-y-1/2 text-xl pointer-events-none" />
             </div>
-
-            {/* Cart Button */}
             <button
               onClick={() => navigate("/cart")}
-              className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group"
+              className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group relative"
+              title="Cart"
             >
               <span className="group-hover:block hidden transition-all duration-200">
                 Order
               </span>
               <FaCartShopping className="text-xl" />
+              {cartItems && cartItems.length > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  {cartItems.length}
+                </span>
+              )}
             </button>
-
-            {/* Login Button */}
-            <button
-              onClick={() => setOrderPopup(true)}
-              className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group"
-              title="Login"
-            >
-              <span className="group-hover:block hidden transition-all duration-200">
-                Login
-              </span>
-              <FaUserCircle className="text-xl" />
-            </button>
-
-            {/* Dark Mode Toggle */}
+            {/* Profile/username/logout */}
+            {username ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <FaUserCircle className="text-2xl text-primary" />
+                  <span className="font-semibold text-primary whitespace-nowrap">
+                    {username}
+                  </span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded-full ml-2 text-gray-800 dark:text-gray-100 hover:bg-red-100 dark:hover:bg-red-500 hover:text-red-600 transition"
+                  title="Logout"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setOrderPopup(true)}
+                className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-2 group"
+                title="Login"
+              >
+                <FaUserCircle className="text-xl" />
+                <span>Login</span>
+              </button>
+            )}
             <Darkmood />
           </div>
         </div>
       </div>
-
       {/* Lower Navbar */}
       <div className="flex justify-center bg-white dark:bg-gray-900">
         <ul className="sm:flex hidden items-center gap-4">
@@ -106,14 +131,11 @@ const Navbar = ({ setOrderPopup }) => {
               )}
             </li>
           ))}
-
-          {/* Dropdown Example */}
+          {/* Dropdown */}
           <li className="group relative">
             <a href="#" className="flex items-center gap-[2px] py-2">
               Other Accessory
-              <span>
-                <FaCaretDown className="transition-all duration-200 group-hover:rotate-180" />
-              </span>
+              <span>▼</span>
             </a>
             <div className="absolute z-[9999] hidden group-hover:block w-[170px] rounded-md bg-white p-2 text-black shadow">
               <ul>
@@ -147,6 +169,20 @@ const Navbar = ({ setOrderPopup }) => {
               </ul>
             </div>
           </li>
+          {role === "admin" && (
+            <li>
+              <Link
+                to="/admin"
+                className={`inline-block px-4 hover:text-primary duration-200 ${
+                  location.pathname === "/admin"
+                    ? "text-pink-500 font-bold"
+                    : ""
+                }`}
+              >
+                Admin Dashboard
+              </Link>
+            </li>
+          )}
         </ul>
       </div>
     </div>

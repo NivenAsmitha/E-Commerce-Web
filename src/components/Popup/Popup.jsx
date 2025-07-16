@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 
-const Popup = ({ orderPopup, setOrderPopup, setRole }) => {
+const Popup = ({ orderPopup, setOrderPopup, setRole, setUsername }) => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
@@ -54,12 +54,16 @@ const Popup = ({ orderPopup, setOrderPopup, setRole }) => {
       });
 
       const data = await res.json();
+      // Debug log, remove/comment out after test!
+      // console.log("LOGIN RESPONSE:", data);
 
       if (!res.ok) throw new Error(data.error || "Request failed");
 
       if (isLogin) {
-        if (!data.role) throw new Error("User role not found");
+        if (!data.role || !data.username)
+          throw new Error("User role or username not found");
         setRole(data.role);
+        setUsername(data.username); // <--- This updates the App/navbar!
         setOrderPopup(false);
         resetForm();
         navigate(data.role === "admin" ? "/admin" : "/");

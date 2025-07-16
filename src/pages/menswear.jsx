@@ -1,31 +1,19 @@
-import React, { useState } from "react";
-import MenswearBanner from "../assets/website/menswear.jpg"; // Make sure this image exists
-
-// Demo product data. Replace with your real products or fetch from API/admin!
-const mensProducts = [
-  {
-    id: 1,
-    name: "Men's Casual Shirt",
-    price: 39.99,
-    image: "https://via.placeholder.com/400x400?text=Mens+Shirt+1",
-    details: "Comfortable cotton shirt for men. All sizes available.",
-    sizes: ["S", "M", "L", "XL"],
-  },
-  {
-    id: 2,
-    name: "Men's Formal Pants",
-    price: 49.99,
-    image: "https://via.placeholder.com/400x400?text=Mens+Pants",
-    details: "Perfect for office and casual wear.",
-    sizes: ["S", "M", "L", "XL"],
-  },
-  // Add more products as needed
-];
+import React, { useState, useEffect } from "react";
+import MenswearBanner from "../assets/website/menswear.jpg"; // Update this path if needed
 
 export default function Menswear({ handleAddToCart }) {
+  const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
+
+  // Fetch products from backend on mount
+  useEffect(() => {
+    fetch("http://localhost/kaizen-backend/menswear_api.php")
+      .then((res) => res.json())
+      .then((data) => setProducts(data))
+      .catch(() => setProducts([]));
+  }, []);
 
   const openProduct = (product) => {
     setSelectedProduct(product);
@@ -71,26 +59,37 @@ export default function Menswear({ handleAddToCart }) {
           Stylish Picks for Men
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {mensProducts.map((product) => (
-            <div
-              key={product.id}
-              className="bg-white dark:bg-gray-900 shadow rounded p-4 text-center"
-            >
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-48 object-cover rounded"
-              />
-              <h4 className="mt-2 font-bold">{product.name}</h4>
-              <p className="text-pink-500 font-bold">${product.price}</p>
-              <button
-                className="mt-2 px-4 py-1 bg-primary text-white rounded"
-                onClick={() => openProduct(product)}
-              >
-                Quick View
-              </button>
+          {products.length === 0 ? (
+            <div className="col-span-4 text-center text-gray-500">
+              No products available.
             </div>
-          ))}
+          ) : (
+            products.map((product) => (
+              <div
+                key={product.id}
+                className="bg-white dark:bg-gray-900 shadow rounded p-4 text-center"
+              >
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  className="w-full h-48 object-cover rounded"
+                />
+                <h4 className="mt-2 font-bold">{product.name}</h4>
+                <p className="text-pink-500 font-bold">
+                  {Number(product.price).toLocaleString(undefined, {
+                    style: "currency",
+                    currency: "USD",
+                  })}
+                </p>
+                <button
+                  className="mt-2 px-4 py-1 bg-primary text-white rounded"
+                  onClick={() => openProduct(product)}
+                >
+                  Quick View
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </section>
 
@@ -105,13 +104,16 @@ export default function Menswear({ handleAddToCart }) {
               ×
             </button>
             <img
-              src={selectedProduct.image}
+              src={selectedProduct.image_url}
               alt={selectedProduct.name}
               className="w-full h-64 object-cover rounded mb-4"
             />
             <h4 className="text-lg font-bold mb-2">{selectedProduct.name}</h4>
             <p className="text-pink-600 text-xl mb-2">
-              ${selectedProduct.price}
+              {Number(selectedProduct.price).toLocaleString(undefined, {
+                style: "currency",
+                currency: "USD",
+              })}
             </p>
             <select
               className="w-full mb-2 border px-2 py-1 rounded"
@@ -119,11 +121,13 @@ export default function Menswear({ handleAddToCart }) {
               onChange={(e) => setSelectedSize(e.target.value)}
             >
               <option value="">Select Size</option>
-              {selectedProduct.sizes.map((sz) => (
-                <option key={sz} value={sz}>
-                  {sz}
-                </option>
-              ))}
+              {(selectedProduct.sizes || "").split(",").map((sz) =>
+                sz ? (
+                  <option key={sz.trim()} value={sz.trim()}>
+                    {sz.trim()}
+                  </option>
+                ) : null
+              )}
             </select>
             <input
               type="number"
@@ -139,7 +143,7 @@ export default function Menswear({ handleAddToCart }) {
               Add to Cart
             </button>
             <h4 className="mt-4 font-semibold">Product Details</h4>
-            <p>{selectedProduct.details}</p>
+            <p>{selectedProduct.description}</p>
           </div>
         </div>
       )}
