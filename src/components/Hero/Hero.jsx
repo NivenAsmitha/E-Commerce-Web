@@ -30,7 +30,7 @@ const ImageList = [
   },
 ];
 
-const Hero = ({ handleOrderPopup }) => {
+const Hero = ({ isLoggedIn, setOrderPopup }) => {
   const settings = {
     dots: true,
     arrows: false,
@@ -68,7 +68,10 @@ const Hero = ({ handleOrderPopup }) => {
                   </p>
                   <div>
                     <button
-                      onClick={handleOrderPopup}
+                      onClick={() => {
+                        if (!isLoggedIn) return setOrderPopup(true);
+                        // (Optional: else do something for logged-in user)
+                      }}
                       className="bg-gradient-to-r from-pink-400 via-primary to-secondary hover:scale-105 duration-200 text-white py-2 px-7 rounded-full font-semibold shadow-lg shadow-pink-100/40"
                     >
                       Order Now

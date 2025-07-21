@@ -36,7 +36,7 @@ export default function Cart({ cartItems, removeFromCart, clearCart }) {
   const [message, setMessage] = useState("");
 
   const total = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + Number(item.price) * (item.quantity || 1),
     0
   );
 
@@ -141,20 +141,28 @@ export default function Cart({ cartItems, removeFromCart, clearCart }) {
                 className="flex flex-col sm:flex-row items-center gap-4 py-4 border-b last:border-0"
               >
                 <img
-                  src={item.image}
-                  alt={item.name}
+                  src={item.image_url || item.img || item.image}
+                  alt={item.name || item.title}
                   className="w-24 h-24 object-cover rounded shadow"
                 />
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-lg">{item.name}</h3>
-                  <p>
-                    Size: <span className="font-semibold">{item.size}</span>
-                  </p>
+                  <h3 className="font-bold text-lg">
+                    {item.name || item.title}
+                  </h3>
+                  {item.size && (
+                    <p>
+                      Size: <span className="font-semibold">{item.size}</span>
+                    </p>
+                  )}
                   <p>
                     Qty: <span className="font-semibold">{item.quantity}</span>
                   </p>
                   <p className="text-pink-500 font-bold">
-                    Price: ${item.price}
+                    Price: $
+                    {Number(item.price).toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                     {item.quantity > 1 && <> x {item.quantity}</>}
                   </p>
                 </div>
@@ -169,7 +177,11 @@ export default function Cart({ cartItems, removeFromCart, clearCart }) {
           </ul>
           <div className="flex flex-col items-end mt-6 gap-3">
             <span className="text-lg font-bold text-primary">
-              Total: ${total.toFixed(2)}
+              Total: $
+              {total.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </span>
             <button
               className="mt-2 bg-primary text-white font-bold px-6 py-2 rounded shadow"

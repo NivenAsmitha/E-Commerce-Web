@@ -5,15 +5,19 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+
 import Navbar from "./components/Navbar/Navbar";
-import Popup from "./components/Popup/Popup";
 import Footer from "./components/Footer/Footer";
+import Popup from "./components/Popup/Popup";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+
 import Hero from "./components/Hero/Hero";
 import Products from "./components/Products/Products";
 import TopProducts from "./components/TopProducts/TopProducts";
 import Banner from "./components/Banner/Banner";
 import Subscribe from "./components/Subscribe/Subscribe";
 import Testimonials from "./components/Testimonials/Testimonials";
+
 import About from "./pages/about";
 import Menswear from "./pages/menswear";
 import Womenwear from "./pages/womenwear";
@@ -23,35 +27,41 @@ import Caps from "./pages/caps";
 import Bag from "./pages/bag";
 import Cart from "./pages/cart";
 import AdminPage from "./pages/AdminPage";
+import SupportChat from "./pages/SupportChat";
+import SupportDashboard from "./pages/SupportDashboard";
 
 function App() {
   const [orderPopup, setOrderPopup] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
-  const [role, setRole] = useState(""); // "user" or "admin"
-  const [username, setUsername] = useState("");
+  const [role, setRole] = useState(""); // "user", "admin", or "support"
+  const [username, setUsername] = useState(""); // or userId if you have
+  // If you store the user ID in your login, add: const [userId, setUserId] = useState("");
 
   useEffect(() => {
     if (role) localStorage.setItem("role", role);
     else localStorage.removeItem("role");
     if (username) localStorage.setItem("username", username);
     else localStorage.removeItem("username");
+    // If using userId: if (userId) localStorage.setItem("userId", userId);
   }, [role, username]);
 
   useEffect(() => {
     const savedRole = localStorage.getItem("role");
     const savedUsername = localStorage.getItem("username");
+    // const savedUserId = localStorage.getItem("userId");
     if (savedRole) setRole(savedRole);
     if (savedUsername) setUsername(savedUsername);
+    // if (savedUserId) setUserId(savedUserId);
   }, []);
 
-  // This is the key function!
+  const isLoggedIn = !!username;
+
   const handleAddToCart = (product) => {
     setCartItems((prev) => [...prev, product]);
     setSuccessMessage("Item added to cart!");
     setTimeout(() => setSuccessMessage(""), 2000);
   };
-
   const removeFromCart = (removeIdx) =>
     setCartItems((prev) => prev.filter((_, idx) => idx !== removeIdx));
   const clearCart = () => setCartItems([]);
@@ -71,9 +81,8 @@ function App() {
         setOrderPopup={setOrderPopup}
         setRole={setRole}
         setUsername={setUsername}
+        // setUserId={setUserId} // Uncomment if you save user ID on login
       />
-
-      {/* Global success message for Add to Cart */}
       {successMessage && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded shadow-lg z-50">
           {successMessage}
@@ -81,57 +90,136 @@ function App() {
       )}
 
       <Routes>
+        {/* Public Landing/Home Page */}
         <Route
           path="/"
           element={
             <>
-              <Hero />
-              <Products handleAddToCart={handleAddToCart} />
-              <TopProducts handleAddToCart={handleAddToCart} />
-              <Banner />
-              <Subscribe />
-              <Testimonials />
+              <Hero isLoggedIn={isLoggedIn} setOrderPopup={setOrderPopup} />
+              <Products
+                handleAddToCart={handleAddToCart}
+                isLoggedIn={isLoggedIn}
+                setOrderPopup={setOrderPopup}
+              />
+              <TopProducts
+                handleAddToCart={handleAddToCart}
+                isLoggedIn={isLoggedIn}
+                setOrderPopup={setOrderPopup}
+              />
+              <Banner isLoggedIn={isLoggedIn} setOrderPopup={setOrderPopup} />
+              <Subscribe
+                isLoggedIn={isLoggedIn}
+                setOrderPopup={setOrderPopup}
+              />
+              <Testimonials
+                isLoggedIn={isLoggedIn}
+                setOrderPopup={setOrderPopup}
+              />
             </>
           }
         />
-        <Route path="/about" element={<About />} />
+
+        {/* Protected Routes (must be logged in) */}
+        <Route
+          path="/about"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <About />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/menswear"
-          element={<Menswear handleAddToCart={handleAddToCart} />}
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <Menswear handleAddToCart={handleAddToCart} />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/womenwear"
-          element={<Womenwear handleAddToCart={handleAddToCart} />}
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <Womenwear handleAddToCart={handleAddToCart} />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/toprated" element={<Toprated />} />
+        <Route
+          path="/toprated"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <Toprated />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/footwear"
-          element={<Footwear handleAddToCart={handleAddToCart} />}
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <Footwear handleAddToCart={handleAddToCart} />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/caps"
-          element={<Caps handleAddToCart={handleAddToCart} />}
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <Caps handleAddToCart={handleAddToCart} />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/bag"
-          element={<Bag handleAddToCart={handleAddToCart} />}
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <Bag handleAddToCart={handleAddToCart} />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/cart"
           element={
-            <Cart
-              cartItems={cartItems}
-              removeFromCart={removeFromCart}
-              clearCart={clearCart}
-            />
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <Cart
+                cartItems={cartItems}
+                removeFromCart={removeFromCart}
+                clearCart={clearCart}
+              />
+            </ProtectedRoute>
           }
         />
+
+        {/* Customer Support Messaging: For users */}
+        <Route
+          path="/support-chat"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn && role === "user"}>
+              <SupportChat userId={username} /> {/* or userId if available */}
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Support Dashboard: For support users */}
+        <Route
+          path="/support"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn && role === "support"}>
+              <SupportDashboard supportId={username} /> {/* or userId */}
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Page: Only for admin role */}
         <Route
           path="/admin"
           element={
-            role === "admin" ? <AdminPage /> : <Navigate to="/" replace />
+            <ProtectedRoute isLoggedIn={role === "admin"}>
+              <AdminPage />
+            </ProtectedRoute>
           }
         />
+
+        {/* Catch all: Redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
