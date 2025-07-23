@@ -10,14 +10,12 @@ import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
 import Popup from "./components/Popup/Popup";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
-
 import Hero from "./components/Hero/Hero";
 import Products from "./components/Products/Products";
 import TopProducts from "./components/TopProducts/TopProducts";
 import Banner from "./components/Banner/Banner";
 import Subscribe from "./components/Subscribe/Subscribe";
 import Testimonials from "./components/Testimonials/Testimonials";
-
 import About from "./pages/about";
 import Menswear from "./pages/menswear";
 import Womenwear from "./pages/womenwear";
@@ -35,24 +33,22 @@ function App() {
   const [cartItems, setCartItems] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [role, setRole] = useState(""); // "user", "admin", or "support"
-  const [username, setUsername] = useState(""); // or userId if you have
-  // If you store the user ID in your login, add: const [userId, setUserId] = useState("");
+  const [username, setUsername] = useState("");
 
+  // Save login to localStorage
   useEffect(() => {
     if (role) localStorage.setItem("role", role);
     else localStorage.removeItem("role");
     if (username) localStorage.setItem("username", username);
     else localStorage.removeItem("username");
-    // If using userId: if (userId) localStorage.setItem("userId", userId);
   }, [role, username]);
 
+  // Load login from localStorage
   useEffect(() => {
     const savedRole = localStorage.getItem("role");
     const savedUsername = localStorage.getItem("username");
-    // const savedUserId = localStorage.getItem("userId");
     if (savedRole) setRole(savedRole);
     if (savedUsername) setUsername(savedUsername);
-    // if (savedUserId) setUserId(savedUserId);
   }, []);
 
   const isLoggedIn = !!username;
@@ -81,7 +77,7 @@ function App() {
         setOrderPopup={setOrderPopup}
         setRole={setRole}
         setUsername={setUsername}
-        // setUserId={setUserId} // Uncomment if you save user ID on login
+        role={role}
       />
       {successMessage && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded shadow-lg z-50">
@@ -90,7 +86,7 @@ function App() {
       )}
 
       <Routes>
-        {/* Public Landing/Home Page */}
+        {/* Public Home */}
         <Route
           path="/"
           element={
@@ -118,8 +114,7 @@ function App() {
             </>
           }
         />
-
-        {/* Protected Routes (must be logged in) */}
+        {/* Protected: About */}
         <Route
           path="/about"
           element={
@@ -128,6 +123,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* Product categories */}
         <Route
           path="/menswear"
           element={
@@ -176,6 +172,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* Cart */}
         <Route
           path="/cart"
           element={
@@ -188,28 +185,25 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-        {/* Customer Support Messaging: For users */}
+        {/* Support Chat (for users) */}
         <Route
           path="/support-chat"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn && role === "user"}>
-              <SupportChat userId={username} /> {/* or userId if available */}
+              <SupportChat userId={username} />
             </ProtectedRoute>
           }
         />
-
-        {/* Support Dashboard: For support users */}
+        {/* Support Dashboard (for support users) */}
         <Route
           path="/support"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn && role === "support"}>
-              <SupportDashboard supportId={username} /> {/* or userId */}
+              <SupportDashboard supportId={username} />
             </ProtectedRoute>
           }
         />
-
-        {/* Admin Page: Only for admin role */}
+        {/* Admin Page */}
         <Route
           path="/admin"
           element={
@@ -218,8 +212,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-        {/* Catch all: Redirect to home */}
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
