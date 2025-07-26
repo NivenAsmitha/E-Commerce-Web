@@ -4,8 +4,12 @@ import FastDelivery from "../assets/website/f4.png";
 import OnlineOrder from "../assets/website/f2.png";
 import Offers from "../assets/website/f6.png";
 import SaleBanner from "../assets/website/sale2.jpg";
+import SupportChat from "../components/SupportChat/SupportChat";
 
 export default function About() {
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userId = storedUser?.id || null;
+
   return (
     <div className="bg-pink-50 dark:bg-gray-950 min-h-screen">
       {/* Banner Section */}
@@ -27,6 +31,7 @@ export default function About() {
         </div>
       </section>
 
+      {/* About Section */}
       <section className="container mx-auto px-4 pb-10">
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-8 max-w-4xl mx-auto -mt-16 relative z-20 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-primary mb-4">
@@ -38,8 +43,7 @@ export default function About() {
               KAIZEN Clothing
             </span>{" "}
             – where style meets comfort! We are dedicated to bringing you
-            high-quality apparel for every occasion. From casual to
-            sophisticated, you’ll find the perfect fit.
+            high-quality apparel for every occasion.
           </p>
           <p className="text-base text-gray-600 dark:text-gray-400 mb-4">
             Our focus is on quality and comfort. Each piece is crafted from
@@ -98,13 +102,15 @@ export default function About() {
           </div>
         </div>
       </section>
+
+      {/* Upcoming Offers */}
       <section className="container mx-auto px-4 py-12">
         <div className="bg-gradient-to-tr from-secondary/10 via-primary/10 to-pink-100/30 rounded-2xl shadow-xl flex flex-col md:flex-row items-center gap-8 p-8 md:p-12">
           <div className="flex-1 flex justify-center">
             <img
               src={SaleBanner}
               alt="Upcoming Offers"
-              className="w-full max-w-md rounded-2xl shadow-lg"
+              className="w-full max-w-md rounded-2xl shadow-lg animate-fadein"
               loading="lazy"
             />
           </div>
@@ -115,14 +121,24 @@ export default function About() {
             <p className="text-lg text-gray-700 dark:text-gray-200 mb-3">
               Exciting new deals are on the way! Stay tuned for our special
               sales and limited-time offers. Make sure you’ve signed up for our
-              newsletter so you never miss a chance to save big on the latest
-              trends and your favorite pieces.
+              newsletter so you never miss a chance to save big.
             </p>
             <div className="font-semibold text-secondary mt-6">
               📢 Watch this space for more updates!
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Support Chat Box */}
+      <section className="container mx-auto px-4 py-10">
+        {userId ? (
+          <SupportChat userId={userId} />
+        ) : (
+          <div className="text-center text-red-400">
+            ⚠️ Please log in to chat with support.
+          </div>
+        )}
       </section>
     </div>
   );

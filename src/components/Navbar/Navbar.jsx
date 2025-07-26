@@ -175,7 +175,7 @@ const Navbar = ({
               </ul>
             </div>
           </li>
-          {/* ⭐️ Admin Dashboard link only for admin */}
+          {/* Admin Dashboard link only for admin */}
           {role === "admin" && (
             <li>
               <Link
@@ -187,6 +187,21 @@ const Navbar = ({
                 }`}
               >
                 Admin Dashboard
+              </Link>
+            </li>
+          )}
+          {/* Support Dashboard link only for support */}
+          {role === "support" && (
+            <li>
+              <Link
+                to="/support"
+                className={`inline-block px-4 hover:text-primary duration-200 ${
+                  location.pathname === "/support"
+                    ? "text-pink-500 font-bold"
+                    : ""
+                }`}
+              >
+                Support Dashboard
               </Link>
             </li>
           )}

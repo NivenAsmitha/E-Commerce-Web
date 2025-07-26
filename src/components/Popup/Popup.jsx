@@ -54,19 +54,23 @@ const Popup = ({ orderPopup, setOrderPopup, setRole, setUsername }) => {
       });
 
       const data = await res.json();
-      // Debug log, remove/comment out after test!
-      // console.log("LOGIN RESPONSE:", data);
-
       if (!res.ok) throw new Error(data.error || "Request failed");
 
       if (isLogin) {
         if (!data.role || !data.username)
           throw new Error("User role or username not found");
         setRole(data.role);
-        setUsername(data.username); // <--- This updates the App/navbar!
+        setUsername(data.username);
         setOrderPopup(false);
         resetForm();
-        navigate(data.role === "admin" ? "/admin" : "/");
+        // ===== THE ONLY CHANGE YOU NEEDED IS THIS 👇👇👇
+        if (data.role === "admin") {
+          navigate("/admin");
+        } else if (data.role === "support") {
+          navigate("/support");
+        } else {
+          navigate("/");
+        }
       } else {
         alert("Registration successful. Please log in.");
         setIsLogin(true);
