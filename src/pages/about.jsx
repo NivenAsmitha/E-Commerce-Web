@@ -7,8 +7,7 @@ import SaleBanner from "../assets/website/sale2.jpg";
 import SupportChat from "../components/SupportChat/SupportChat";
 
 export default function About() {
-  const storedUser = JSON.parse(localStorage.getItem("user"));
-  const userId = storedUser?.id || null;
+  const userId = localStorage.getItem("user_id");
 
   return (
     <div className="bg-pink-50 dark:bg-gray-950 min-h-screen">
@@ -135,7 +134,7 @@ export default function About() {
         {userId ? (
           <SupportChat userId={userId} />
         ) : (
-          <div className="text-center text-red-400">
+          <div className="text-center text-red-400 text-lg font-medium">
             ⚠️ Please log in to chat with support.
           </div>
         )}

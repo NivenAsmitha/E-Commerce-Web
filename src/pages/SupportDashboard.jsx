@@ -1,161 +1,148 @@
+// src/components/SupportDashboard.jsx
+
 import React, { useEffect, useState } from "react";
+import { SendHorizontal } from "lucide-react";
 
-export default function SupportDashboard({ supportId }) {
+const SupportDashboard = () => {
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [chat, setChat] = useState([]);
-  const [reply, setReply] = useState("");
-  const [refresh, setRefresh] = useState(0);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [replyValue, setReplyValue] = useState("");
+  const supportId = localStorage.getItem("supportId"); // ✅ required
 
+  // Fetch open users on load
   useEffect(() => {
     fetch("http://localhost/kaizen-backend/get_open_users.php")
       .then((res) => res.json())
-      .then(setUsers)
-      .catch((err) => {
-        console.error("Failed to fetch open users:", err);
-        setUsers([]);
-      });
-  }, [refresh]);
-
-  useEffect(() => {
-    if (!selectedUser) return;
-    fetch(
-      `http://localhost/kaizen-backend/get_messages.php?user_id=${selectedUser.user_id}`
-    )
-      .then((res) => res.json())
-      .then(setChat)
-      .catch(() => setChat([]));
-  }, [selectedUser, refresh]);
-
-  useEffect(() => {
-    const interval = setInterval(() => setRefresh((r) => r + 1), 5000);
-    return () => clearInterval(interval);
+      .then((data) => setUsers(data))
+      .catch((err) => console.error("Error fetching users:", err));
   }, []);
 
+  // Fetch messages for selected user
+  useEffect(() => {
+    if (!selectedUserId) return;
+
+    fetch(
+      `http://localhost/kaizen-backend/get_messages.php?user_id=${selectedUserId}`
+    )
+      .then((res) => res.json())
+      .then((data) => setMessages(data))
+      .catch((err) => console.error("Error fetching messages:", err));
+  }, [selectedUserId]);
+
+  // Send reply to user
   const handleReply = async () => {
-    if (!reply.trim() || !selectedUser || !supportId) return;
+    if (!replyValue.trim() || !supportId || !selectedUserId) return;
 
-    const openMessages = chat.filter((m) => !m.reply);
-    if (openMessages.length === 0) return;
+    const latestMessage = messages[messages.length - 1];
+    const messageId = latestMessage?.id;
 
-    let failed = false;
-
-    for (const msg of openMessages) {
-      const payload = {
-        id: msg.id,
-        reply: reply.trim(),
-        support_id: supportId,
-      };
-
-      try {
-        const res = await fetch(
-          "http://localhost/kaizen-backend/reply_message.php",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          }
-        );
-
-        const result = await res.json();
-
-        if (!result.success) {
-          console.error("Reply failed:", result);
-          failed = true;
+    try {
+      const res = await fetch(
+        "http://localhost/kaizen-backend/reply_message.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: messageId,
+            reply: replyValue,
+            support_id: supportId,
+          }),
         }
-      } catch (err) {
-        console.error("Network error:", err);
-        failed = true;
-      }
-    }
+      );
 
-    if (failed) {
-      alert("Some replies failed. Check console for details.");
-    } else {
-      setReply("");
-      setRefresh((r) => r + 1);
+      const data = await res.json();
+      if (data.success) {
+        setReplyValue("");
+        // Refresh messages
+        const refreshed = await fetch(
+          `http://localhost/kaizen-backend/get_messages.php?user_id=${selectedUserId}`
+        );
+        const refreshedMessages = await refreshed.json();
+        setMessages(refreshedMessages);
+      } else {
+        alert(data.error || "Failed to send reply");
+      }
+    } catch (err) {
+      alert("Reply error: " + err.message);
     }
   };
 
   return (
-    <div className="flex bg-white rounded-xl shadow-lg my-8 mx-auto max-w-4xl min-h-[500px]">
-      {/* Sidebar */}
-      <aside className="w-1/3 bg-pink-50 border-r p-6 rounded-l-xl">
-        <h2 className="text-lg font-bold mb-4 text-pink-700">Open Users</h2>
-        {users.length === 0 ? (
-          <div className="text-gray-400">No open chats.</div>
-        ) : (
-          <ul>
-            {users.map((u, i) => (
-              <li
-                key={`${u.user_id}-${i}`}
-                className={`cursor-pointer px-2 py-2 rounded mb-1 hover:bg-pink-100 ${
-                  selectedUser?.user_id === u.user_id ? "bg-pink-200" : ""
+    <div className="flex h-screen bg-gray-100">
+      {/* Left: User List */}
+      <div className="w-1/4 border-r overflow-y-auto bg-pink-100">
+        <h2 className="text-xl font-bold p-4 text-pink-800">Open Chats</h2>
+        {users.length === 0 && (
+          <p className="px-4 text-sm text-gray-600">No active users.</p>
+        )}
+        {users.map((user) => (
+          <div
+            key={user.user_id}
+            onClick={() => setSelectedUserId(user.user_id)}
+            className={`cursor-pointer px-4 py-3 hover:bg-pink-200 ${
+              selectedUserId === user.user_id
+                ? "bg-pink-300 font-semibold text-pink-900"
+                : "text-gray-800"
+            }`}
+          >
+            {user.username}
+          </div>
+        ))}
+      </div>
+
+      {/* Right: Chat Area */}
+      <div className="w-3/4 flex flex-col">
+        {/* Chat Messages */}
+        <div className="flex-1 p-4 overflow-y-auto">
+          {selectedUserId ? (
+            messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`mb-4 flex ${
+                  msg.reply ? "justify-end" : "justify-start"
                 }`}
-                onClick={() => setSelectedUser(u)}
               >
-                {u.username}
-              </li>
-            ))}
-          </ul>
-        )}
-      </aside>
-
-      {/* Chat Panel */}
-      <main className="flex-1 p-6">
-        {!selectedUser ? (
-          <div className="text-center text-gray-400 my-32">
-            Select a user to view messages
-          </div>
-        ) : (
-          <div>
-            <h3 className="font-bold text-lg mb-3 text-primary">
-              Chat with{" "}
-              <span className="text-pink-600">{selectedUser.username}</span>
-            </h3>
-
-            <div className="bg-gray-100 p-3 rounded h-64 overflow-y-auto space-y-4 mb-4">
-              {chat.length === 0 ? (
-                <div className="text-gray-400">No messages yet.</div>
-              ) : (
-                chat.map((msg) => (
-                  <div key={msg.id}>
-                    <div className="font-semibold text-pink-800">
-                      {msg.message}
-                    </div>
-                    {msg.reply && (
-                      <div className="ml-4 text-green-600">
-                        <b>Support:</b> {msg.reply}
-                      </div>
-                    )}
-                    <div className="text-xs text-gray-400">
-                      {new Date(msg.created_at).toLocaleString()}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {chat.some((m) => !m.reply) && (
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  className="border rounded px-2 py-1 flex-1"
-                  value={reply}
-                  onChange={(e) => setReply(e.target.value)}
-                  placeholder="Reply to user..."
-                />
-                <button
-                  className="bg-primary text-white px-4 py-1 rounded"
-                  onClick={handleReply}
+                <div
+                  className={`p-3 rounded-lg max-w-md ${
+                    msg.reply
+                      ? "bg-pink-400 text-white"
+                      : "bg-white border border-pink-300"
+                  }`}
                 >
-                  Send
-                </button>
+                  {msg.reply || msg.message}
+                </div>
               </div>
-            )}
+            ))
+          ) : (
+            <p className="text-gray-500 text-center mt-10">
+              Select a user to view messages
+            </p>
+          )}
+        </div>
+
+        {/* Reply Input */}
+        {selectedUserId && (
+          <div className="p-4 border-t bg-white flex items-center">
+            <input
+              type="text"
+              placeholder="Type your reply..."
+              className="flex-1 border border-gray-300 p-2 rounded mr-2"
+              value={replyValue}
+              onChange={(e) => setReplyValue(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleReply()}
+            />
+            <button
+              onClick={handleReply}
+              className="bg-pink-500 hover:bg-pink-600 text-white p-2 rounded"
+            >
+              <SendHorizontal className="w-5 h-5" />
+            </button>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
-}
+};
+
+export default SupportDashboard;

@@ -54,16 +54,29 @@ const Popup = ({ orderPopup, setOrderPopup, setRole, setUsername }) => {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Request failed");
+      if (!res.ok || !data.success)
+        throw new Error(data.error || "Login/Register failed");
 
       if (isLogin) {
-        if (!data.role || !data.username)
-          throw new Error("User role or username not found");
+        if (!data.role || !data.username || !data.id)
+          throw new Error("Missing login response data");
+
         setRole(data.role);
         setUsername(data.username);
+        localStorage.setItem("role", data.role);
+        localStorage.setItem("username", data.username);
+
+        // ✅ Store user_id for cart system
+        localStorage.setItem("user_id", data.id); // <-- this line is the fix
+
+        // Optional: support role specific ID
+        if (data.role === "support") {
+          localStorage.setItem("supportId", data.id);
+        }
+
         setOrderPopup(false);
         resetForm();
-        // ===== THE ONLY CHANGE YOU NEEDED IS THIS 👇👇👇
+
         if (data.role === "admin") {
           navigate("/admin");
         } else if (data.role === "support") {

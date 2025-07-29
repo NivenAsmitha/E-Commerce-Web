@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from "react";
 
-export default function ProductGrid({
-  fetchUrl,
-  bannerImg,
-  title,
-  subtitle,
-  handleAddToCart,
-}) {
+export default function ProductGrid({ fetchUrl, bannerImg, title, subtitle }) {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [addedMsg, setAddedMsg] = useState(""); // ✅ new state
 
   useEffect(() => {
     fetch(fetchUrl)
@@ -28,21 +23,50 @@ export default function ProductGrid({
   const closeModal = () => setSelectedProduct(null);
 
   const addToCartAndClose = () => {
+    const user_id = localStorage.getItem("user_id");
+
+    if (!user_id) {
+      alert("Please log in to add to cart.");
+      return;
+    }
+
     if (selectedProduct.sizes && !selectedSize) {
       alert("Please select a size!");
       return;
     }
-    handleAddToCart({
-      ...selectedProduct,
-      size: selectedSize,
-      quantity,
-    });
-    closeModal();
+
+    fetch("http://localhost/kaizen-backend/cart/add_to_cart.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id,
+        product_id: selectedProduct.id,
+        name: selectedProduct.name,
+        size: selectedSize || "default",
+        price: selectedProduct.price,
+        quantity,
+        image_url: selectedProduct.image_url || selectedProduct.image,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === "success") {
+          setAddedMsg("Item added to cart!"); // ✅ show message
+          setTimeout(() => setAddedMsg(""), 2500);
+          closeModal();
+        } else {
+          alert("Failed to add to cart.");
+        }
+      })
+      .catch((err) => {
+        console.error("Cart error:", err);
+        alert("Something went wrong.");
+      });
   };
 
   return (
     <div className="bg-pink-50 dark:bg-gray-950 min-h-screen pb-10">
-      {/* Banner with Top Rated size & style */}
+      {/* Banner */}
       <section className="relative flex items-center justify-center min-h-[220px] md:min-h-[300px] lg:min-h-[340px] bg-gradient-to-tr from-primary/60 via-secondary/40 to-pink-200/70 mb-8 overflow-hidden shadow-lg rounded-2xl mx-auto w-[98vw] max-w-[1600px]">
         <img
           src={bannerImg}
@@ -57,7 +81,7 @@ export default function ProductGrid({
         </div>
       </section>
 
-      {/* Product grid section */}
+      {/* Product Grid */}
       <section className="w-full mx-auto bg-white/80 dark:bg-gray-900/80 rounded-xl shadow-xl px-2 sm:px-6 py-8 mb-10 border border-gray-200 dark:border-gray-800">
         <h2 className="text-2xl md:text-3xl font-bold text-primary text-center mb-7">
           {subtitle}
@@ -71,14 +95,8 @@ export default function ProductGrid({
             products.map((product, i) => (
               <div
                 key={product.id}
-                className={`
-                  bg-white dark:bg-gray-900 shadow rounded-lg flex flex-col h-full p-3 items-center
-                  group hover:shadow-xl transition duration-300 ease-in
-                  opacity-0 animate-fadein
-                `}
-                style={{
-                  animationDelay: `${i * 80}ms`,
-                }}
+                className="bg-white dark:bg-gray-900 shadow rounded-lg flex flex-col h-full p-3 items-center group hover:shadow-xl transition duration-300 ease-in opacity-0 animate-fadein"
+                style={{ animationDelay: `${i * 80}ms` }}
               >
                 <div className="w-full aspect-[3/4] overflow-hidden rounded mb-2">
                   <img
@@ -108,7 +126,7 @@ export default function ProductGrid({
         </div>
       </section>
 
-      {/* Product Modal Popup */}
+      {/* Product Modal */}
       {selectedProduct && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex justify-center items-center animate-fadein-fast">
           <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 max-w-md w-full relative scale-100 animate-popup">
@@ -165,12 +183,19 @@ export default function ProductGrid({
         </div>
       )}
 
+      {/* ✅ Success message */}
+      {addedMsg && (
+        <div className="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow z-50">
+          {addedMsg}
+        </div>
+      )}
+
       {/* Animations */}
       <style>
         {`
         @keyframes fadein {
-          from { opacity: 0; transform: translateY(10px);}
-          to { opacity: 1; transform: none;}
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: none; }
         }
         .animate-fadein {
           animation: fadein 0.6s cubic-bezier(.46,.03,.52,.96) both;
@@ -179,8 +204,8 @@ export default function ProductGrid({
           animation: fadein 0.3s cubic-bezier(.46,.03,.52,.96) both;
         }
         @keyframes popup {
-          from { opacity: 0; transform: scale(.92);}
-          to { opacity: 1; transform: scale(1);}
+          from { opacity: 0; transform: scale(.92); }
+          to { opacity: 1; transform: scale(1); }
         }
         .animate-popup {
           animation: popup 0.28s cubic-bezier(.46,.03,.52,.96) both;

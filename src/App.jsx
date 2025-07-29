@@ -33,25 +33,25 @@ function App() {
   const [cartItems, setCartItems] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [role, setRole] = useState(""); // "user", "admin", or "support"
-  const [username, setUsername] = useState("");
+  const [user, setUser] = useState(null); // { id, username }
 
   // Save login to localStorage
   useEffect(() => {
     if (role) localStorage.setItem("role", role);
     else localStorage.removeItem("role");
-    if (username) localStorage.setItem("username", username);
-    else localStorage.removeItem("username");
-  }, [role, username]);
+    if (user) localStorage.setItem("user", JSON.stringify(user));
+    else localStorage.removeItem("user");
+  }, [role, user]);
 
   // Load login from localStorage
   useEffect(() => {
     const savedRole = localStorage.getItem("role");
-    const savedUsername = localStorage.getItem("username");
+    const savedUser = localStorage.getItem("user");
     if (savedRole) setRole(savedRole);
-    if (savedUsername) setUsername(savedUsername);
+    if (savedUser) setUser(JSON.parse(savedUser));
   }, []);
 
-  const isLoggedIn = !!username;
+  const isLoggedIn = !!user;
 
   const handleAddToCart = (product) => {
     setCartItems((prev) => [...prev, product]);
@@ -66,17 +66,17 @@ function App() {
     <Router>
       <Navbar
         setOrderPopup={setOrderPopup}
-        username={username}
+        username={user?.username}
         role={role}
         setRole={setRole}
-        setUsername={setUsername}
+        setUsername={(username) => setUser((u) => ({ ...u, username }))}
         cartItems={cartItems}
       />
       <Popup
         orderPopup={orderPopup}
         setOrderPopup={setOrderPopup}
         setRole={setRole}
-        setUsername={setUsername}
+        setUsername={(username) => setUser((u) => ({ ...u, username }))}
         role={role}
       />
       {successMessage && (
@@ -190,7 +190,7 @@ function App() {
           path="/support-chat"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn && role === "user"}>
-              <SupportChat userId={username} />
+              <SupportChat userId={user?.id} />
             </ProtectedRoute>
           }
         />
@@ -199,7 +199,7 @@ function App() {
           path="/support"
           element={
             <ProtectedRoute isLoggedIn={isLoggedIn && role === "support"}>
-              <SupportDashboard supportId={username} />
+              <SupportDashboard supportId={user?.id} />
             </ProtectedRoute>
           }
         />
