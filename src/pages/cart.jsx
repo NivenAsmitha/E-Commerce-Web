@@ -395,7 +395,7 @@ export default function Cart() {
         </div>
       )}
 
-      {message && <p className="text-red-600 mt-4">{message}</p>}
+      {message && <p className="te-red-600 mt-4">{message}</p>}
     </div>
   );
 }
