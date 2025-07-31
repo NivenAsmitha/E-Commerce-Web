@@ -27,15 +27,15 @@ import Cart from "./pages/cart";
 import AdminPage from "./pages/AdminPage";
 import SupportChat from "./pages/SupportChat";
 import SupportDashboard from "./pages/SupportDashboard";
+import BillHistory from "./pages/BillHistory";
 
 function App() {
   const [orderPopup, setOrderPopup] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
-  const [role, setRole] = useState(""); // "user", "admin", or "support"
-  const [user, setUser] = useState(null); // { id, username }
+  const [role, setRole] = useState("");
+  const [user, setUser] = useState(null);
 
-  // Save login to localStorage
   useEffect(() => {
     if (role) localStorage.setItem("role", role);
     else localStorage.removeItem("role");
@@ -43,7 +43,6 @@ function App() {
     else localStorage.removeItem("user");
   }, [role, user]);
 
-  // Load login from localStorage
   useEffect(() => {
     const savedRole = localStorage.getItem("role");
     const savedUser = localStorage.getItem("user");
@@ -86,7 +85,6 @@ function App() {
       )}
 
       <Routes>
-        {/* Public Home */}
         <Route
           path="/"
           element={
@@ -114,7 +112,6 @@ function App() {
             </>
           }
         />
-        {/* Protected: About */}
         <Route
           path="/about"
           element={
@@ -123,7 +120,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* Product categories */}
         <Route
           path="/menswear"
           element={
@@ -172,7 +168,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* Cart */}
         <Route
           path="/cart"
           element={
@@ -185,7 +180,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* Support Chat (for users) */}
         <Route
           path="/support-chat"
           element={
@@ -194,7 +188,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* Support Dashboard (for support users) */}
         <Route
           path="/support"
           element={
@@ -203,7 +196,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* Admin Page */}
         <Route
           path="/admin"
           element={
@@ -212,7 +204,14 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* Fallback */}
+        <Route
+          path="/bills"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <BillHistory />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />

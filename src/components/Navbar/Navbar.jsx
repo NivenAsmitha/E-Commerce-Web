@@ -44,14 +44,11 @@ const Navbar = ({
       {/* Upper Navbar */}
       <div className="bg-primary/40 py-2">
         <div className="container mx-auto flex justify-between items-center py-2">
-          {/* Logo and Brand */}
           <Link to="/" className="font-bold text-xl flex items-center gap-2">
             <img src={LOGO} alt="Logo" className="w-12" />
             KAIZEN
           </Link>
-          {/* Right Side */}
           <div className="relative flex items-center gap-3">
-            {/* Search Bar */}
             <div className="relative group hidden sm:block">
               <input
                 type="text"
@@ -60,7 +57,6 @@ const Navbar = ({
               />
               <IoMdSearch className="text-gray-500 group-hover:text-primary absolute top-1/2 left-3 -translate-y-1/2 text-xl pointer-events-none" />
             </div>
-            {/* Cart Button with badge */}
             <button
               onClick={() => navigate("/cart")}
               className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-3 group relative"
@@ -76,9 +72,7 @@ const Navbar = ({
                 </span>
               )}
             </button>
-            {/* Profile Icon + Username + Login/Logout */}
             {username ? (
-              // If logged in: show profile icon, username, and logout button
               <>
                 <div className="flex items-center gap-2">
                   <FaUserCircle className="text-2xl text-primary" />
@@ -95,7 +89,6 @@ const Navbar = ({
                 </button>
               </>
             ) : (
-              // If not logged in: show Login button only (with icon)
               <button
                 onClick={() => setOrderPopup(true)}
                 className="bg-gradient-to-r from-primary to-secondary transition-all duration-200 text-white py-1 px-4 rounded-full flex items-center gap-2 group"
@@ -117,13 +110,11 @@ const Navbar = ({
               {item.type === "page" ? (
                 <Link
                   to={item.link}
-                  className={`inline-block px-4 hover:text-primary duration-200
-                    ${
-                      location.pathname === item.link
-                        ? "text-pink-500 font-bold"
-                        : ""
-                    }
-                  `}
+                  className={`inline-block px-4 hover:text-primary duration-200 ${
+                    location.pathname === item.link
+                      ? "text-pink-500 font-bold"
+                      : ""
+                  }`}
                 >
                   {item.name}
                 </Link>
@@ -137,7 +128,6 @@ const Navbar = ({
               )}
             </li>
           ))}
-          {/* Dropdown Example */}
           <li className="group relative">
             <a href="#" className="flex items-center gap-[2px] py-2">
               Other Accessory
@@ -145,37 +135,23 @@ const Navbar = ({
             </a>
             <div className="absolute z-[9999] hidden group-hover:block w-[170px] rounded-md bg-white p-2 text-black shadow">
               <ul>
-                {DropdownLinks.map((data) =>
-                  data.type === "page" ? (
-                    <li key={data.id}>
-                      <Link
-                        to={data.link}
-                        className={`inline-block w-full rounded-md p-2 hover:bg-primary/20
-                          ${
-                            location.pathname === data.link
-                              ? "text-pink-500 font-bold"
-                              : ""
-                          }
-                        `}
-                      >
-                        {data.name}
-                      </Link>
-                    </li>
-                  ) : (
-                    <li key={data.id}>
-                      <a
-                        href={data.link}
-                        className="inline-block w-full rounded-md p-2 hover:bg-primary/20"
-                      >
-                        {data.name}
-                      </a>
-                    </li>
-                  )
-                )}
+                {DropdownLinks.map((data) => (
+                  <li key={data.id}>
+                    <Link
+                      to={data.link}
+                      className={`inline-block w-full rounded-md p-2 hover:bg-primary/20 ${
+                        location.pathname === data.link
+                          ? "text-pink-500 font-bold"
+                          : ""
+                      }`}
+                    >
+                      {data.name}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
           </li>
-          {/* Admin Dashboard link only for admin */}
           {role === "admin" && (
             <li>
               <Link
@@ -190,7 +166,6 @@ const Navbar = ({
               </Link>
             </li>
           )}
-          {/* Support Dashboard link only for support */}
           {role === "support" && (
             <li>
               <Link
@@ -202,6 +177,20 @@ const Navbar = ({
                 }`}
               >
                 Support Dashboard
+              </Link>
+            </li>
+          )}
+          {role === "user" && (
+            <li>
+              <Link
+                to="/bills"
+                className={`inline-block px-4 hover:text-primary duration-200 ${
+                  location.pathname === "/bills"
+                    ? "text-pink-500 font-bold"
+                    : ""
+                }`}
+              >
+                🧾 Bill History
               </Link>
             </li>
           )}
