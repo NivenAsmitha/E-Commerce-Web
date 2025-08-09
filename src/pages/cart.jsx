@@ -25,7 +25,7 @@ export default function Cart() {
   const [address, setAddress] = useState({
     firstName: "",
     lastName: "",
-    country: "",
+    country: "Sri Lanka",
     province: "",
     district: "",
     homeTown: "",
@@ -89,26 +89,31 @@ export default function Cart() {
       delivery_address: address.homeTown,
       province: address.province,
       district: address.district,
+      firstName: address.firstName, // ✅ FIXED
+      lastName: address.lastName, // ✅ FIXED
     };
 
-    const response = await fetch(
-      "http://localhost/kaizen-backend/simulate_payment.php",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order, items: cartItems }),
+    try {
+      const response = await fetch(
+        "http://localhost/kaizen-backend/simulate_payment.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ order, items: cartItems }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.status === "success") {
+        setFinalBill({ ...order, cartItems });
+        setOrderConfirm(true);
+        clearCart();
+      } else {
+        setMessage("Order failed: " + (data.message || "unknown error"));
       }
-    );
-
-    const data = await response.json();
-    console.log("💬 Payment Response:", data);
-
-    if (data.status === "success") {
-      setFinalBill({ ...order, cartItems });
-      setOrderConfirm(true);
-      clearCart();
-    } else {
-      setMessage("Order failed: " + (data.message || "unknown error"));
+    } catch (err) {
+      setMessage("Server error: " + err.message);
     }
   };
 
@@ -126,17 +131,17 @@ export default function Cart() {
     else setShowCODModal(true);
   };
 
-  const handleCODConfirm = () => {
-    handleOrderSubmit("cod");
-    setShowCODModal(false);
-  };
-
   const handleCardSubmit = (e) => {
     e.preventDefault();
     const valid = Object.values(card).every((v) => v);
     if (!valid) return setMessage("Please fill in all card details.");
-    handleOrderSubmit("card");
     setShowCardModal(false);
+    handleOrderSubmit("card");
+  };
+
+  const handleCODConfirm = () => {
+    setShowCODModal(false);
+    handleOrderSubmit("cod");
   };
 
   return (
@@ -351,7 +356,7 @@ export default function Cart() {
         </div>
       )}
 
-      {/* COD Confirm Modal */}
+      {/* COD Modal */}
       {showCODModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm animate-slide-up">
@@ -376,7 +381,7 @@ export default function Cart() {
         </div>
       )}
 
-      {/* Payment Success Animation */}
+      {/* Payment Success */}
       {orderConfirm && (
         <div className="fixed inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center z-50 animate-fade-in">
           <div className="text-center">
@@ -395,7 +400,7 @@ export default function Cart() {
         </div>
       )}
 
-      {message && <p className="te-red-600 mt-4">{message}</p>}
+      {message && <p className="text-red-600 mt-4">{message}</p>}
     </div>
   );
 }

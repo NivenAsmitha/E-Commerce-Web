@@ -4,6 +4,16 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
+import dayjs from "dayjs";
 
 const categories = [
   { key: "menswear", label: "Menswear" },
@@ -60,20 +70,38 @@ export default function AdminPage() {
   const fetchSupportUsers = () => {
     fetch(`${backendBase}get_support_users.php`)
       .then((res) => res.json())
-      .then(setSupportUsers);
+      .then(setSupportUsers)
+      .catch(() => setSupportUsers([]));
   };
 
   const fetchAllCustomers = () => {
     fetch(`${backendBase}get_normal_users.php`)
       .then((res) => res.json())
-      .then(setAllCustomers);
+      .then(setAllCustomers)
+      .catch(() => setAllCustomers([]));
   };
 
   const fetchReport = () => {
-    fetch(`${backendBase}get_sales_report.php?type=${reportType}`)
-      .then((res) => res.json())
-      .then(setSalesReport)
-      .catch(() => setSalesReport([]));
+    fetch(`${backendBase}admin/get_sales_report.php?type=${reportType}`, {
+      method: "GET",
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch sales report");
+        return res.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setSalesReport(data);
+        } else {
+          console.error("Unexpected data:", data);
+          setSalesReport([]);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setSalesReport([]);
+      });
   };
 
   const saveProduct = async (e) => {
@@ -115,7 +143,7 @@ export default function AdminPage() {
 
   const saveSupportUser = async (e) => {
     e.preventDefault();
-    const { id, username, password, email, phone } = supportForm;
+    const { id } = supportForm;
     const url = id
       ? `${backendBase}edit_support_user.php`
       : `${backendBase}add_support_user.php`;
@@ -170,6 +198,7 @@ export default function AdminPage() {
   };
 
   const addEvent = () => {
+    if (!eventForm.title.trim()) return;
     setEvents((prev) => [
       ...prev,
       { title: eventForm.title, date: selectedDate },
@@ -179,6 +208,7 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Tabs */}
       <div className="flex flex-wrap justify-center gap-4 mb-8">
         {["product", "users", "support", "reports", "calendar"].map(
           (key, i) => (
@@ -455,12 +485,12 @@ export default function AdminPage() {
         </section>
       )}
 
-      {/* Reports Section */}
+      {/* === REPORTS SECTION === */}
       {currentSection === "reports" && (
         <section className="space-y-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <h2 className="text-xl font-bold text-pink-700">Sales Report</h2>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-2">
               <select
                 value={reportType}
                 onChange={(e) => setReportType(e.target.value)}
@@ -478,7 +508,53 @@ export default function AdminPage() {
               </button>
             </div>
           </div>
-          <div id="sales-report" className="bg-white p-4 rounded-xl shadow">
+
+          {/* Summary */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="rounded-xl bg-white p-4 shadow">
+              <div className="text-xs text-gray-500">Total Revenue</div>
+              <div className="text-2xl font-semibold">
+                Rs.
+                {salesReport
+                  .reduce((sum, r) => sum + Number(r.total), 0)
+                  .toFixed(2)}
+              </div>
+            </div>
+            <div className="rounded-xl bg-white p-4 shadow">
+              <div className="text-xs text-gray-500">Total Orders</div>
+              <div className="text-2xl font-semibold">{salesReport.length}</div>
+            </div>
+            <div className="rounded-xl bg-white p-4 shadow">
+              <div className="text-xs text-gray-500">Items Sold</div>
+              <div className="text-2xl font-semibold">
+                {salesReport.reduce((sum, r) => sum + Number(r.quantity), 0)}
+              </div>
+            </div>
+          </div>
+
+          {/* Chart */}
+          <div className="bg-white p-4 rounded-xl shadow">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={salesReport.map((r) => ({
+                  date: dayjs(r.date).format("MMM D"),
+                  revenue: Number(r.total),
+                }))}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip formatter={(value) => `Rs.${value}`} />
+                <Bar dataKey="revenue" fill="#ec4899" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Table */}
+          <div
+            id="sales-report"
+            className="bg-white p-4 rounded-xl shadow overflow-x-auto"
+          >
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-pink-100">
@@ -490,19 +566,25 @@ export default function AdminPage() {
               </thead>
               <tbody>
                 {salesReport.map((r, i) => (
-                  <tr key={i}>
+                  <tr key={i} className="border-t">
                     <td className="p-2">{r.date}</td>
                     <td className="p-2">{r.product_name}</td>
                     <td className="p-2">{r.quantity}</td>
-                    <td className="p-2">${r.total}</td>
+                    <td className="p-2">Rs.{r.total}</td>
                   </tr>
                 ))}
+                {!salesReport.length && (
+                  <tr>
+                    <td colSpan={4} className="p-4 text-center text-gray-500">
+                      No data available
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         </section>
       )}
-
       {/* Calendar Section */}
       {currentSection === "calendar" && (
         <section className="space-y-4">
