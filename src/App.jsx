@@ -19,7 +19,7 @@ import Testimonials from "./components/Testimonials/Testimonials";
 import About from "./pages/about";
 import Menswear from "./pages/menswear";
 import Womenwear from "./pages/womenwear";
-import Toprated from "./pages/toprated";
+import Toprated from "./pages/TopRated";
 import Footwear from "./pages/footwear";
 import Caps from "./pages/caps";
 import Bag from "./pages/bag";
@@ -28,6 +28,7 @@ import AdminPage from "./pages/AdminPage";
 import SupportChat from "./pages/SupportChat";
 import SupportDashboard from "./pages/SupportDashboard";
 import BillHistory from "./pages/BillHistory";
+import SearchResults from "./pages/SearchResults";
 
 function App() {
   const [orderPopup, setOrderPopup] = useState(false);
@@ -57,8 +58,10 @@ function App() {
     setSuccessMessage("Item added to cart!");
     setTimeout(() => setSuccessMessage(""), 2000);
   };
+
   const removeFromCart = (removeIdx) =>
     setCartItems((prev) => prev.filter((_, idx) => idx !== removeIdx));
+
   const clearCart = () => setCartItems([]);
 
   return (
@@ -71,6 +74,7 @@ function App() {
         setUsername={(username) => setUser((u) => ({ ...u, username }))}
         cartItems={cartItems}
       />
+
       <Popup
         orderPopup={orderPopup}
         setOrderPopup={setOrderPopup}
@@ -78,6 +82,7 @@ function App() {
         setUsername={(username) => setUser((u) => ({ ...u, username }))}
         role={role}
       />
+
       {successMessage && (
         <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded shadow-lg z-50">
           {successMessage}
@@ -212,8 +217,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute isLoggedIn={isLoggedIn}>
+              <SearchResults handleAddToCart={handleAddToCart} />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
       <Footer />
     </Router>
   );

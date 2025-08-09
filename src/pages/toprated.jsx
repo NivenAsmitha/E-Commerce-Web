@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useMemo } from "react";
 import TopRatedBanner from "../assets/website/topratedbanner.jpg";
 
-// Backend base (edit if different)
+// Change this if your backend URL is different:
 const BACKEND_BASE = "http://localhost/kaizen-backend";
 const API_URL = `${BACKEND_BASE}/get_best_selling.php`;
 
-// Prepend backend to relative image paths
+// Optional: prepend backend to relative image paths from DB
 const withBase = (src) => {
   if (!src) return "";
   if (/^https?:\/\//i.test(src)) return src;
@@ -18,49 +18,43 @@ export default function TopRated() {
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    let alive = true;
-    fetch(API_URL, { credentials: "include" })
+    let isMounted = true;
+    fetch(API_URL)
       .then(async (res) => {
-        const text = await res.text();
-        try {
-          const json = JSON.parse(text);
-          if (!res.ok) throw new Error(json.message || text);
-          const list = Array.isArray(json)
-            ? json
-            : Array.isArray(json.data)
-            ? json.data
-            : [];
-          if (alive) setProducts(list);
-        } catch (e) {
-          throw new Error(text);
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || `HTTP ${res.status}`);
         }
+        return res.json();
+      })
+      .then((data) => {
+        if (!isMounted) return;
+        // Ensure it’s an array
+        setProducts(Array.isArray(data) ? data : []);
       })
       .catch((e) => {
         console.error("TopRated fetch error:", e);
-        if (alive) setErr("Could not load best-selling products.");
+        if (isMounted) setErr("Could not load best-selling products.");
       })
-      .finally(() => alive && setLoading(false));
+      .finally(() => isMounted && setLoading(false));
     return () => {
-      alive = false;
+      isMounted = false;
     };
   }, []);
 
   const content = useMemo(() => {
-    if (loading)
+    if (loading) {
       return (
         <div className="text-center text-gray-400 text-lg">Loading...</div>
       );
+    }
     if (err) {
       return (
         <div className="w-full bg-white dark:bg-gray-900 rounded-2xl shadow-lg px-4 py-10 text-center">
           <div className="text-red-500 font-semibold">{err}</div>
           <div className="text-gray-400 mt-2 text-sm">
-            Open <code>{API_URL}</code> in your browser. If you see a JSON
-            error, add the proper schema via query params (e.g.{" "}
-            <code>
-              ?pt=product&amp;lt=orderdetails&amp;pid=prod_id&amp;qty=qty
-            </code>
-            ) or set them in the PHP file.
+            Make sure <code>get_best_selling.php</code> is reachable and tables
+            match your schema.
           </div>
         </div>
       );
@@ -70,7 +64,7 @@ export default function TopRated() {
         <div className="w-full bg-white dark:bg-gray-900 rounded-2xl shadow-lg px-4 py-10 text-center">
           <div className="text-gray-400 text-lg">No top products yet.</div>
           <div className="text-gray-400 text-sm">
-            (They’ll appear after some sales.)
+            (They’ll appear here once there are sales.)
           </div>
         </div>
       );
@@ -112,6 +106,7 @@ export default function TopRated() {
 
   return (
     <div className="bg-pink-50 dark:bg-gray-950 min-h-screen pb-10">
+      {/* Banner */}
       <section className="relative flex items-center justify-center min-h-[220px] md:min-h-[300px] lg:min-h-[340px] bg-gradient-to-tr from-primary/60 via-secondary/40 to-pink-200/70 mb-12 overflow-hidden shadow-lg rounded-2xl mx-auto w-[98vw] max-w-[1600px]">
         <img
           src={TopRatedBanner}
@@ -126,6 +121,7 @@ export default function TopRated() {
         </div>
       </section>
 
+      {/* Content */}
       <section className="container px-4">
         <h2 className="text-3xl md:text-4xl font-extrabold text-pink-500 text-center mb-10">
           Best Sellers (Auto)
